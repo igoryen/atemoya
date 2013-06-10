@@ -7,14 +7,15 @@ const DEFAULT_PROJECT = 'amore';
 var fs = require('fs'),
 mkpath = require('mkpath'),
 path = require('path'),
-request = require('request'),
-detailsPath = '/?details',
-url = BASE_URL + options.project + detailsPath;
+request = require('request');
+
 
 console.log("dbg: past declarations");
 
 function importFromTransifex(options)
 {
+  console.log('dbg: in importFromTransifex()');
+
   var authHead = 'Basic' + new Buffer(options.user).toString('base64');
 
   function writeFile(relPath, exports, callback)
@@ -51,6 +52,9 @@ function importFromTransifex(options)
     } ); // request.get()
   } // projectRequest()
 
+
+  var detailsPath = '/?details',
+      url = BASE_URL + options.project + detailsPath;
 
   projectRequest(url, function (error, projectDetails) 
   {
