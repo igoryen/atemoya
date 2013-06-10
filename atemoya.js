@@ -16,7 +16,7 @@ function importFromTransifex(options)
 {
   console.log('dbg: in importFromTransifex()');
 
-  var authHead = 'Basic' + new Buffer(options.user).toString('base64');
+  var authHeader = 'Basic' + new Buffer(options.user).toString('base64');
 
   function writeFile(relPath, exports, callback)
   {
@@ -54,7 +54,7 @@ function importFromTransifex(options)
 
 
   var detailsPath = '/?details',
-      url = BASE_URL + options.project + detailsPath;
+      url = BASE_URL + options.project + detailsPath; // 3
 
   projectRequest(url, function (error, projectDetails) 
   {
@@ -129,4 +129,5 @@ if (!module.parent)
 =====================================================================
   1) declareing constants
   2) including modules
+  3) this var is declared here because this is its scope
 */
