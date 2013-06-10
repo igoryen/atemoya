@@ -10,19 +10,24 @@ path = require('path'),
 request = require('request');
 
 
-console.log("dbg: past declarations");
+     console.log("   dbg: past declarations");
 
 function importFromTransifex(options)
 {
-  console.log('dbg: in importFromTransifex()');
+       console.log('   dbg: entered importFromTransifex()');
+       console.log('   dbg: options: ' + options);
 
   var authHeader = 'Basic' + new Buffer(options.user).toString('base64');
+       console.log('   dbg: authHeader: ' + authHeader);
 
   function writeFile(relPath, exports, callback)
   {
+         console.log('   dbg: entered writeFile()');
     callback = callback || function(){};
-
     var absPath = path.join(options.dir, relPath);
+
+        console.log('   dbg: absPath: ' + absPath);
+
 
     mkpath(path.dirname(absPath), function (err)
     {
@@ -34,7 +39,7 @@ function importFromTransifex(options)
     });
   } // writeFile()
 
-  function projectRequest (url, callback)
+  function projectRequest (url, callback) // 5
   {
     request.get(  { url:url, headers:{'Authorization': authHeader} }, function (error, response, body)
     {
@@ -49,24 +54,29 @@ function importFromTransifex(options)
 
       callback(null, body);
 
-    } ); // request.get()
+    }); // request.get()
   } // projectRequest()
 
 
   var detailsPath = '/?details',
       url = BASE_URL + options.project + detailsPath; // 3
 
-  projectRequest(url, function (error, projectDetails) 
+  projectRequest(url, function (error, projectDetails) // 4
   {
+         console.log('   dbg: in projectRequest()');
+         console.log('   dbg: projectDetails: ' + projectDetails);
+
     if (error)
     {
-      return console.log("Cannot return the project details");
+      return console.log("   dbg: I cyan return the project details");
     }
 
     var resources =  JSON.parse(projectDetails);
+         console.log('   dbg: resources: ' + resources);
 
     resources.teams.forEach(function (entry)
     {
+           console.log('   dbg: in forEach');
       resourcePath = resources.resources[0].slug + '/translation/' + entry;
 
       var url = BASE_URL + options.project + '/resource/' + resourcePath + '/?file';
@@ -75,7 +85,7 @@ function importFromTransifex(options)
       {
         if (error)
         {
-          return console.log("Cannot return the fileContent");
+          return console.log("   dbg: I cyan return the fileContent");
         }
 
         var filename = entry + '.plist';
@@ -100,6 +110,7 @@ function importFromTransifex(options)
 
 function main()
 {
+       console.log('   dbg: entered main()');
   var program = require ('commander');
 
   program
@@ -130,4 +141,7 @@ if (!module.parent)
   1) declareing constants
   2) including modules
   3) this var is declared here because this is its scope
+  4) projectRequest() is used. projectDetails is an alias to the function call
+  5) projectRequest() is defined
+
 */
