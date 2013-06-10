@@ -22,12 +22,15 @@ function importFromTransifex(options) // 9
   var authHeader = 'Basic' + new Buffer(options.user).toString('base64'); // 7
        console.log('   dbg: authHeader: ' + authHeader);
 
-  function writeFile(relPath, exports, callback)
-  {
+
+
+  function writeFile(relPath, exports, callback)      
+  {                                                        console.log('   \ndbg: in writeFile(): relPath: ' + relPath + '; exports:' + exports + '; callback:'+callback);
     callback = callback || function(){};
     var absPath = path.join(options.dir, relPath);
 
         console.log('   dbg: absPath: ' + absPath);
+
 
 
     mkpath(path.dirname(absPath), function (err)
@@ -46,14 +49,14 @@ function importFromTransifex(options) // 9
   function projectRequest (url, callback) // 5
   {
     request.get(  { url:url, headers:{'Authorization': authHeader} }, function (error, response, body) // 8
-    {                                                  console.log('   dbg: error: ' + error + '; response: ' + response + '; response.statusCode: ' + response.statusCode +  '; body: ' + body);
+    {                                                  console.log('   \ndbg: in projectRequest: \nurl: ' + url + '; \nauthHeader: '+authHeader+'; \nerror: ' + error + '; \nresponse: ' + response + '; \nresponse.statusCode: ' + response.statusCode +  '; \nbody: ' + body);
       if (error)
       {
         callback(error);
       }
 
       if (response.statusCode !== 200)
-      {             console.log('   dbg: in the if(response.statusCode !==200)');
+      {                                                                       console.log('   dbg: in the if(response.statusCode !==200)');
         callback(Error (url + " returned " + response.statusCode));  // 10
       }
 
@@ -71,7 +74,7 @@ function importFromTransifex(options) // 9
 
   projectRequest(url, function (error, projectDetails) // 4
   {
-         console.log('   dbg: projectDetails: ' + projectDetails);
+         console.log('   \ndbg: in projectRequest(): \nerror: >>'+ error +'<<; \nprojectDetails: ' + projectDetails);
 
     if (error)
     {
@@ -149,12 +152,13 @@ if (!module.parent)
   4) projectRequest() is used. It is calling the anonymous function whose parameter is projectDetails 
   5) projectRequest() definition.
   6) expecting a .json file 
-  7) this is where it needs the username and pw first.
+  7) Use the username and pw.
     encodes acc. to a Base64 scheme (look up in Wikipedia)
   8) pass .. to the header(s)
     error: "null"
     response value is [object Object]
     body value is "Authorization required"
   9) options value is [object Object]
+  10) Create an Error object. Error() is a constructor of an Error object? (part of node.js.)
 
 */
