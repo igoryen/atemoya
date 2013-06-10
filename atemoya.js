@@ -14,7 +14,6 @@ request = require('request');
 
 function importFromTransifex(options)
 {
-       console.log('   dbg: entered importFromTransifex()');
        console.log('   dbg: options: ' + options);
 
   var authHeader = 'Basic' + new Buffer(options.user).toString('base64');
@@ -22,7 +21,6 @@ function importFromTransifex(options)
 
   function writeFile(relPath, exports, callback)
   {
-         console.log('   dbg: entered writeFile()');
     callback = callback || function(){};
     var absPath = path.join(options.dir, relPath);
 
@@ -63,7 +61,6 @@ function importFromTransifex(options)
 
   projectRequest(url, function (error, projectDetails) // 4
   {
-         console.log('   dbg: in projectRequest()');
          console.log('   dbg: projectDetails: ' + projectDetails);
 
     if (error)
@@ -76,9 +73,7 @@ function importFromTransifex(options)
 
     resources.teams.forEach(function (entry)
     {
-           console.log('   dbg: in forEach');
       resourcePath = resources.resources[0].slug + '/translation/' + entry;
-
       var url = BASE_URL + options.project + '/resource/' + resourcePath + '/?file';
 
       projectRequest (url, function (error, fileContent)
