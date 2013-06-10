@@ -12,11 +12,14 @@ request = require('request');
 
      console.log("   dbg: past declarations");
 
-function importFromTransifex(options)
+function importFromTransifex(options) // 9
 {
-       console.log('   dbg: options: ' + options);
+       console.log('   dbg: options: ' + options); 
 
-  var authHeader = 'Basic' + new Buffer(options.user).toString('base64');
+
+
+
+  var authHeader = 'Basic' + new Buffer(options.user).toString('base64'); // 7
        console.log('   dbg: authHeader: ' + authHeader);
 
   function writeFile(relPath, exports, callback)
@@ -37,17 +40,21 @@ function importFromTransifex(options)
     });
   } // writeFile()
 
+
+
+
   function projectRequest (url, callback) // 5
   {
-    request.get(  { url:url, headers:{'Authorization': authHeader} }, function (error, response, body)
-    {
+    request.get(  { url:url, headers:{'Authorization': authHeader} }, function (error, response, body) // 8
+    {                                                  console.log('   dbg: error: ' + error + '; response: ' + response + '; response.statusCode: ' + response.statusCode +  '; body: ' + body);
       if (error)
       {
         callback(error);
       }
+
       if (response.statusCode !== 200)
-      {
-        callback(Error (url + " returned " + response.statusCode));
+      {             console.log('   dbg: in the if(response.statusCode !==200)');
+        callback(Error (url + " returned " + response.statusCode));  // 10
       }
 
       callback(null, body);
@@ -59,16 +66,19 @@ function importFromTransifex(options)
   var detailsPath = '/?details',
       url = BASE_URL + options.project + detailsPath; // 3
 
+
+
+
   projectRequest(url, function (error, projectDetails) // 4
   {
          console.log('   dbg: projectDetails: ' + projectDetails);
 
     if (error)
     {
-      return console.log("   dbg: I cyan return the project details");
+      return console.log("Cannot return the project details");
     }
 
-    var resources =  JSON.parse(projectDetails);
+    var resources =  JSON.parse(projectDetails); // 6
          console.log('   dbg: resources: ' + resources);
 
     resources.teams.forEach(function (entry)
@@ -136,7 +146,15 @@ if (!module.parent)
   1) declareing constants
   2) including modules
   3) this var is declared here because this is its scope
-  4) projectRequest() is used. projectDetails is an alias to the function call
-  5) projectRequest() is defined
+  4) projectRequest() is used. It is calling the anonymous function whose parameter is projectDetails 
+  5) projectRequest() definition.
+  6) expecting a .json file 
+  7) this is where it needs the username and pw first.
+    encodes acc. to a Base64 scheme (look up in Wikipedia)
+  8) pass .. to the header(s)
+    error: "null"
+    response value is [object Object]
+    body value is "Authorization required"
+  9) options value is [object Object]
 
 */
