@@ -49,7 +49,7 @@ function importFromTransifex(options) // 9
   function projectRequest (url, callback) // 5
   {
     request.get(  { url:url, headers:{'Authorization': authHeader} }, function (error, response, body) // 8
-    {                                                  console.log('   \ndbg: in projectRequest: \nurl: ' + url + '; \nauthHeader: '+authHeader+'; \nerror: ' + error + '; \nresponse: ' + response + '; \nresponse.statusCode: ' + response.statusCode +  '; \nbody: ' + body);
+    {                                                  console.log('   \ndbg: in function projectRequest(): \nurl: ' + url + '; \nauthHeader: '+authHeader+'; \nerror: ' + error + '; \nresponse: ' + response + '; \nresponse.statusCode: ' + response.statusCode +  '; \nbody: ' + body);
       if (error)
       {
         callback(error);
