@@ -1,135 +1,85 @@
-
 // 1 
-const BASE_URL = "https://www.transifex.com/api/2/project/";
+const BASE_URL = 'https://www.transifex.com/api/2/project/';
 const DEFAULT_DIR = 'locale';
 const DEFAULT_PROJECT = 'amore';
-
 // 2
 var fs = require('fs'),
-mkpath = require('mkpath'),
-path = require('path'),
-request = require('request');                                    
-                                                                console.log("   line 11: past declarations");
+  mkpath = require('mkpath'),
+  path = require('path'),
+  request = require('request');                             
 
-function importFromTransifex(options) // 9
-{                                                                 console.log('\n   line 13: options --> ' + options); 
+function importFromTransifex(options) { // 14
+  var authHeader = 'Basic ' + new Buffer(options.user).toString('base64');  // 15   
 
-  var authHeader = 'Basic' + new Buffer(options.user).toString('base64');  // 7
-                                                                 console.log('   line 16: authHeader --> ' + authHeader);
-  function writeFile(relPath, exports, callback)      
-  {                                                              console.log('   \nline 18: in writeFile(): relPath --> ' + relPath + '; exports --> ' + exports + '; callback --> '+callback);
+  function writeFile( relPath, exports, callback ) {      
     callback = callback || function(){};
-    var absPath = path.join(options.dir, relPath);               console.log('   line 21: absPath --> ' + absPath);
-
-
-    mkpath(path.dirname(absPath), function ( err ) // 11 ?
-    {
-      if (err)
-      {
-        return callback(err);
+    var absPath = path.join(options.dir, relPath);   // 21      
+    mkpath(path.dirname(absPath), function( err ) {
+      if ( err ) {
+        return callback( err );
       }
-      fs.writeFile(absPath, exports, {encodig: "utf-8"}, callback);
+      fs.writeFile(absPath, exports, { encoding: "utf-8" }, callback);
     });
-  } // writeFile()
-
-
-
-
-  function projectRequest (url, callback) // 5
-  {
-    request.get(  { url:url, headers:{'Authorization': authHeader} }, function (error, response, body) // 8 ?
-    {                                                           console.log('\n   line 39: in function projectRequest(): \nurl --> ' + url + '; \nauthHeader --> '+authHeader+'; \nerror --> ' + error + '; \nresponse --> ' + response + '; \nresponse.statusCode --> ' + response.statusCode +  '; \nbody --> ' + body);
-      if (error)
-      {
-        callback(error);
-      }
-
-      if (response.statusCode !== 200)
-      {                                                          console.log('   line 47: in the if(response.statusCode !==200)');
-        callback( Error (url + " returned " + response.statusCode));  // 10
-      }
-
-      callback(null, body);
-
-    }); // request.get()
-  }; // projectRequest() // 12
-
-
-  var detailsPath = '/?details',
-      url = BASE_URL + options.project + detailsPath; // 3
-
-
-
-
-  projectRequest(url, function (error, projectDetails) // 4 ?
-  {                                                                console.log('\n   line 63: in projectRequest(): \nerror --> '+ error +'; \nprojectDetails --> ' + projectDetails);
-
-    if (error)
-    {
-      return console.log("Cannot return the project details");
-    }
-
-    var resources =  JSON.parse(projectDetails); // 6
-                                                                    console.log('   line 71: resources: ' + resources);
-
-    resources.teams.forEach(function (entry) //?
-    {
-      resourcePath = resources.resources[0].slug + '/translation/' + entry;
-      var url = BASE_URL + options.project + '/resource/' + resourcePath + '/?file';
-
-      projectRequest (url, function (error, fileContent) // ?
-      {
-        if (error)
-        {
-          return console.log("Cannot return the fileContent");
-        }
-
-        var filename = entry + '.plist';
-
-        writeFile(filename, fileContent, function (err) //?
-        {
-          console.log( (err ? "Error writing " : "Wrote ") + filename); // 13
-        });// writeFile()
-
-      }); // projectRequest()
-
-    }); //// resources.team.forEach() 
-
-  }); // projectRequest()
-
-} // importFromTransifex 
-
-
-
-
-
-
-function main()
-{                                                                          console.log('   line 107: entered main()');
-  var program = require ('commander');
-
-  program
-    .option ('-u, --user <user:pass>', 'Specify your username and password on Transifex like this: John:abc123')
-    .option ('-p, --project <slug>', 'Specify project slug')
-    .option ('-d, --dir <path>', 'locale directory for the downloaded .plist files')
-    .parse(process.argv);
-                                                                               console.log('   line 115: past program options declarations');
-  if (!program.user)
-  {
-    console.log('Please specify credentials with "-u user:pw".');
-    process.exit(1);
   }
 
-  program.project = program.project || DEFAULT_PROJECT;                             console.log('   line 122: program.project --> '+program.project);
-  program.dir = program.dir || DEFAULT_DIR;                                          console.log('   line 123: program.dir --> ' + program.dir);
-  importFromTransifex(program);                                               console.log('   line 124: started importFromTransifex()');
+  function projectRequest (url, callback) { 
+    request.get({
+      url: url,
+      headers: {'Authorization': authHeader}
+    }, function(error, response, body) {     // 16 , 19                      
+      if (error) {
+        callback(error);
+      }
+      if (response.statusCode !== 200) {                              
+        callback(Error(url + " returned " + response.statusCode));
+      }
+      callback(null, body);
+    });
+  };     
 
-} // main()
+  var detailsPath = '/?details',
+    url = BASE_URL + options.project + detailsPath;
+  projectRequest(url, function(error, projectDetails) {    // 17           
+    if (error) {
+      return console.log("Can not return the project details");
+    }
+    var resources = JSON.parse(projectDetails);  // 18, 20                      
+    resources.teams.forEach(function(entry) {
+      resourcesPath = resources.resources[0].slug + '/translation/' + entry;
+      var url = BASE_URL + options.project + '/resource/' + resourcesPath + '/?file';
+      projectRequest(url, function(error, fileContent){
+        if (error) {
+          return console.log("Can not return the fileContent");
+        }
+        var filename = entry + '.plist';
+        writeFile(filename, fileContent, function( err ) {
+          console.log( ( err ? "Error writing " : "Wrote " ) + filename ); // 22
+        });
+      });
+    });
+  });
+}
 
-if (!module.parent)
-{                                                                                 console.log('   line 128: entered the if (!module.parent)');
+function main() {
+  var program = require('commander');
+  program
+    .option('-u, --user <user:pass>', 'specify a Transifex username and password in the form username:password')
+    .option('-p, --project <slug>', 'specify project slug')
+    .option('-d, --dir <path>', 'locale dir for the downloaded plist files')
+    .parse(process.argv);
+  if (!program.user) {
+    console.log('please specify credentials with "-u user:pass".');
+    process.exit(1);
+  }
+  program.project = program.project || DEFAULT_PROJECT;
+  program.dir = program.dir || DEFAULT_DIR;
+  importFromTransifex(program);
+}
+
+if (!module.parent) {
   main();
 }
+
 
 /*
 =====================================================================
@@ -148,8 +98,138 @@ if (!module.parent)
   9) options value is [object Object]
   10) Create an Error object. Error() is a constructor of an Error object? (part of node.js.)
   11) why is $err orange, not white! 
-  12) end with semicolon (or without?)
+  12) semicolon here is unnecessary 
   13) error[space]? (...)
+  14) value --> [object Object]
+  15) authHeader --> Basic aWdvcnllbjpsMGNhbGl6ZXI=
+  16) url --> https://www.transifex.com/api/2/project/amore/?details; 
+authHeader --> Basic aWdvcnllbjpsMGNhbGl6ZXI=; 
+error --> null; 
+response --> [object Object]; 
+response.statusCode --> 200; 
+body --> {
+    "feed": "", 
+    "last_updated": "2013-06-07T17:42:13.446", 
+    "description": "I love you", 
+    "tags": "", 
+    "trans_instructions": "", 
+    "teams": [
+        "af", 
+        "am", 
+        "ar", 
+        "as", 
+        "az", 
+        ~~~~~~~
+        "vec", 
+        "ady", 
+        "cv"
+    ], 
+    "maintainers": [
+        {
+            "username": "aali"
+        }, 
+        {
+            "username": "igoryen"
+        }
+    ], 
+    "private": false, 
+    "slug": "amore", 
+    "auto_join": false, 
+    "outsource": null, 
+    "fill_up_resources": true, 
+    "bug_tracker": "", 
+    "source_language_code": "en_US", 
+    "owner": {
+        "username": "aali"
+    }, 
+    "homepage": "", 
+    "long_description": "", 
+    "resources": [
+        {
+            "slug": "en", 
+            "name": "en_US.plist"
+        }
+    ], 
+    "name": "amore"
+}
+17) 
+error --> null; 
+projectDetails --> {
+    "feed": "", 
+    "last_updated": "2013-06-07T17:42:13.446", 
+    "description": "I love you", 
+    "tags": "", 
+    "trans_instructions": "", 
+    "teams": [
+        "af", 
+        "am", 
+        "ar", 
+        "as", 
+       ~~~~~~~
+        "os", 
+        "tn", 
+        "vec", 
+        "ady", 
+        "cv"
+    ], 
+    "maintainers": [
+        {
+            "username": "aali"
+        }, 
+        {
+            "username": "igoryen"
+        }
+    ], 
+    "private": false, 
+    "slug": "amore", 
+    "auto_join": false, 
+    "outsource": null, 
+    "fill_up_resources": true, 
+    "bug_tracker": "", 
+    "source_language_code": "en_US", 
+    "owner": {
+        "username": "aali"
+    }, 
+    "homepage": "", 
+    "long_description": "", 
+    "resources": [
+        {
+            "slug": "en", 
+            "name": "en_US.plist"
+        }
+    ], 
+    "name": "amore"
+}
+18) resource --> [object Object]
+19) 
+url --> https://www.transifex.com/api/2/project/amore/resource/en/translation/am/?file; 
+authHeader --> Basic aWdvcnllbjpsMGNhbGl6ZXI=; 
+error --> null; 
+response --> [object Object]; 
+response.statusCode --> 200; 
+body --> <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>iloveyou</key>
+    <string>አፈቅርሻለሁ</string>
+  </dict>
+</plist>
+20) 
+relPath --> am.plist; exports --> <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>iloveyou</key>
+    <string>አፈቅርሻለሁ</string>
+  </dict>
+</plist>
+; callback --> function ( err ) {
+          console.log( ( err ? "Error writing " : "Wrote " ) + filename );
+        }
+
+21) absPath --> importedFiles/am.plist
+22) Wrote am.plist
 
 */
 
